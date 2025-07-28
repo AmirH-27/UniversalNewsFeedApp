@@ -1,0 +1,26 @@
+[
+  {
+    "Source": "medium.com",
+    "BaseUrl": "https://medium.com",
+    "PageUrl": "https://medium.com/tag/programming",
+    "LinkSelector": "//a[.//h2]",
+    "TitleSelector": ".//h2",
+    "UrlSelector": "href"
+  },
+  {
+    "Source": "lobste.rs",
+    "BaseUrl": "https://lobste.rs",
+    "PageUrl": "https://lobste.rs",
+    "LinkSelector": "//div[@class='details']",
+    "TitleSelector": ".//a[contains(@class,'u-url')]",
+    "UrlSelector": ".//a[contains(@class,'u-url')]"
+  },
+  {
+    "Source": "cloudflare.blog",
+    "BaseUrl": "https://blog.cloudflare.com",
+    "PageUrl": "https://blog.cloudflare.com",
+    "LinkSelector": "//a[@data-testid='post-title']",
+    "TitleSelector": ".//h2",
+    "UrlSelector": "href"
+  }
+]
