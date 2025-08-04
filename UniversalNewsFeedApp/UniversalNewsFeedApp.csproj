@@ -19,9 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\UniversalNewsFeedApp.ViewModels\UniversalNewsFeedApp.ViewModels.csproj" />
   </ItemGroup>
 

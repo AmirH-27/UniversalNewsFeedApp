@@ -3,6 +3,6 @@ namespace UniversalNewsFeedApp.Services
 {
     public interface INewsService
     {
-        List<NewsArticle> FetchNews();
+        Task<List<NewsArticle>> FetchNews();
     }
 }

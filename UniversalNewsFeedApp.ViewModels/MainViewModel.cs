@@ -17,6 +17,9 @@ namespace UniversalNewsFeedApp.ViewModel
         [ObservableProperty]
         private string textMessage;
 
+        [ObservableProperty]
+        private bool isLoading;
+
         public IUrlOpenerService UrlOpenerService { get; }
         public IConfigService ConfigService { get; }
         public IHtmlLoader HtmlLoader { get; }
@@ -30,10 +33,10 @@ namespace UniversalNewsFeedApp.ViewModel
             _configs = LoadConfigs();
 
             OpenUrlCommand = new RelayCommand<NewsArticle>(OpenUrl);
-            RefreshCommand = new RelayCommand(RefreshNews);
+            RefreshCommand = new AsyncRelayCommand(RefreshNewsAsync);
             TextMessage = "News Feed Application";
 
-            RefreshNews();
+            _ = RefreshNewsAsync();
         }
 
         private void OpenUrl(NewsArticle? article)
@@ -51,19 +54,22 @@ namespace UniversalNewsFeedApp.ViewModel
             return ConfigService.convertJsonToObj();
         }
 
-
-        private void RefreshNews()
+        [RelayCommand]
+        private async Task RefreshNewsAsync()
         {
+            IsLoading = true;
             Articles.Clear();
             try
             {
-                var allArticles = _configs
-                    .SelectMany(config =>
-                    {
-                        var service = new UniversalNewsService(config, HtmlLoader);
-                        return service.FetchNews();
-                    })
-                    .DistinctBy(article => $"{article.Headline}|{article.Url}");
+                var fetchTasks = _configs.Select(config =>
+                {
+                    var service = new UniversalNewsService(config, HtmlLoader);
+                    return service.FetchNews();
+                });
+                var results = await Task.WhenAll(fetchTasks);
+                var allArticles = results
+                        .SelectMany(list => list)
+                        .DistinctBy(article => $"{article.Headline}|{article.Url}");
 
                 foreach (var article in allArticles)
                 {
@@ -73,6 +79,10 @@ namespace UniversalNewsFeedApp.ViewModel
             catch (ArgumentNullException)
             {
                 TextMessage = "Error Loading Articles";
+            }
+            finally 
+            {
+                IsLoading = false; 
             }
         }
     }

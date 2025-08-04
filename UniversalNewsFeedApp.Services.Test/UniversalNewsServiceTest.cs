@@ -12,7 +12,7 @@ namespace UniversalNewsFeedApp.Services.Test
             htmlDoc.LoadHtml(html);
 
             var mockHtmlLoader = new Mock<IHtmlLoader>();
-            mockHtmlLoader.Setup(x => x.Load(config.PageUrl)).Returns(htmlDoc);
+            mockHtmlLoader.Setup(x => x.LoadAsync(config.PageUrl)).ReturnsAsync(htmlDoc);
 
             return new UniversalNewsService(config, mockHtmlLoader.Object);
         }
@@ -27,7 +27,7 @@ namespace UniversalNewsFeedApp.Services.Test
         };
 
         [Fact]
-        public void FetchNewsReturnsEmptyList()
+        public async Task FetchNewsReturnsEmptyList()
         {
             // Arrange
             var config = GetDefaultConfig();
@@ -35,14 +35,14 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             // Assert
             Assert.Empty(result);
         }
 
         [Fact]
-        public void FetchNews_ReturnsArticles_WhenValidHtmlIsParsed()
+        public async Task FetchNews_ReturnsArticles_WhenValidHtmlIsParsed()
         {
             // Arrange
             var config = GetDefaultConfig();
@@ -60,7 +60,7 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -69,7 +69,7 @@ namespace UniversalNewsFeedApp.Services.Test
         }
 
         [Fact]
-        public void FetchNews_SkipsDuplicateTitles()
+        public async Task FetchNews_SkipsDuplicateTitles()
         {
             // Arrange
             var config = GetDefaultConfig();
@@ -88,14 +88,14 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             // Assert
             Assert.Single(result);
         }
 
         [Fact]
-        public void FetchNews_Extract_Url_IsNull_Or_WhiteSpace()
+        public async Task FetchNews_Extract_Url_IsNull_Or_WhiteSpace()
         {
             var config = GetDefaultConfig();
             config.UrlSelector = "";
@@ -109,7 +109,7 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             Assert.Empty(result);
         }
@@ -131,7 +131,7 @@ namespace UniversalNewsFeedApp.Services.Test
                             </a>
                         </body>
                     </html>")]
-        public void FetchNews_Extract_Url_Correctly(string urlSelector,  string html)
+        public async Task FetchNews_Extract_Url_Correctly(string urlSelector,  string html)
         {
             // Arrange
             var config = GetDefaultConfig();
@@ -140,14 +140,14 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
             
             // Act
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             // Assert
             Assert.Single(result);
         }
 
         [Fact]
-        public void FetchNews_SkipsNodeWhenEmptyHref()
+        public async Task FetchNews_SkipsNodeWhenEmptyHref()
         {
             var config = GetDefaultConfig();
             var html = @"
@@ -160,12 +160,12 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             Assert.Empty(result);
         }
         [Fact]
-        public void FetchNews_SkipsNodeWhenEmptyTitle()
+        public async Task FetchNews_SkipsNodeWhenEmptyTitle()
         {
             var config = GetDefaultConfig();
             var html = @"
@@ -181,13 +181,13 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             Assert.Single(result);
         }
 
         [Fact]
-        public void FetchNews_DecodesAndTrimsTitle()
+        public async Task FetchNews_DecodesAndTrimsTitle()
         {
             var config = GetDefaultConfig();
             var html = @"
@@ -200,7 +200,7 @@ namespace UniversalNewsFeedApp.Services.Test
                 /html>";
 
             var service = CreateService(config, html);
-            var result = service.FetchNews();
+            var result = await service.FetchNews();
 
             Assert.Single(result);
             Assert.Equal("Hello & World", result[0].Headline);

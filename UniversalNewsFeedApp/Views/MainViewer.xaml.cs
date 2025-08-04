@@ -10,7 +10,7 @@ namespace UniversalNewsFeedApp.Views
         public MainViewer()
         {
             InitializeComponent();
-            this.DataContext = new MainViewModel(new UrlOpenerService(new ProcessWrapperService()), new ConfigConversionService("Config/sources.json", new FileService()), new HtmlLoader());
+            this.DataContext = new MainViewModel(new UrlOpenerService(new ProcessWrapperService()), new ConfigConversionService("Config/sources.json", new FileService()), new HtmlLoader(new System.Net.Http.HttpClient()));
         }
     }
 }

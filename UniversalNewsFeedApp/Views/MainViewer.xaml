@@ -1,66 +1,82 @@
 ﻿<UserControl
-              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="clr-namespace:UniversalNewsFeedApp.ViewModel"
-             xmlns:local="clr-namespace:UniversalNewsFeedApp.Views"
-             xmlns:av="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             mc:Ignorable="av" x:Class="UniversalNewsFeedApp.Views.MainViewer"
-             Height="Auto" Width="Auto" av:DesignHeight="343.92" av:DesignWidth="652.5">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="clr-namespace:UniversalNewsFeedApp.ViewModel"
+    xmlns:local="clr-namespace:UniversalNewsFeedApp.Views"
+    xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="av"
+    x:Class="UniversalNewsFeedApp.Views.MainViewer"
+    Height="Auto" Width="Auto" av:DesignHeight="343.92" av:DesignWidth="652.5">
 
+    <!-- Layering container -->
+    <Grid>
+        <!-- Main content -->
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-    <Grid Margin="10">
-        
-        <!-- Define two rows: one for button, one for data -->
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+            <Label Content="{Binding TextMessage}" HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="139"/>
 
-        <Label Content="{Binding TextMessage}" HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="139"/>
+            <DockPanel Grid.Row="0" LastChildFill="False" HorizontalAlignment="Right">
+                <Button Content="Refresh News"
+                        Command="{Binding RefreshCommand}"
+                        Padding="10" Margin="0,0,0,10"/>
+            </DockPanel>
 
+            <DataGrid Grid.Row="1"
+                      ItemsSource="{Binding Articles}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      Margin="0"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow">
 
-        <!-- Button aligned to the top-right -->
-        <DockPanel Grid.Row="0" LastChildFill="False" HorizontalAlignment="Right">
-            <Button Content="Refresh News" Command="{Binding RefreshCommand}" Padding="10" Margin="0,0,0,10"/>
-        </DockPanel>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="*" />
+                    <DataGridTemplateColumn Header="Headline" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Headline}"
+                                           TextDecorations="Underline"
+                                           Foreground="Blue"
+                                           Cursor="Hand">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding Gesture="LeftClick"
+                                                      Command="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      CommandParameter="{Binding}" />
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Downloaded At" Binding="{Binding DownloadedAt}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
-        <DataGrid Grid.Row="1"
-          ItemsSource="{Binding Articles}"
-          AutoGenerateColumns="False"
-          IsReadOnly="True"
-          Margin="0"
-          HeadersVisibility="Column"
-          SelectionMode="Single"
-          SelectionUnit="FullRow">
-
-            <DataGrid.Columns>
-                <!-- Source -->
-                <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="*" />
-
-                <!-- Headline (Clickable) -->
-                <DataGridTemplateColumn Header="Headline" Width="2*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-
-                            <TextBlock Text="{Binding Headline}"
-                                   TextDecorations="Underline"
-                                   Foreground="Blue"
-                                   Cursor="Hand">
-                                <TextBlock.InputBindings>
-                                    <MouseBinding Gesture="LeftClick"
-                                      Command="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                      CommandParameter="{Binding}" />   
-                            </TextBlock.InputBindings>
-                            </TextBlock>
-
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Downloaded At -->
-                <DataGridTextColumn Header="Downloaded At" Binding="{Binding DownloadedAt}" Width="*" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <!-- Loading overlay centered -->
+        <TextBlock Text="Loading..."
+                   FontSize="20"
+                   FontWeight="Bold"
+                   Foreground="Black"
+                   Background="White"
+                   Padding="10"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
     </Grid>
 </UserControl>

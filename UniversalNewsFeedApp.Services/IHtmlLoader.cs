@@ -9,6 +9,6 @@ namespace UniversalNewsFeedApp.Services
 {
     public interface IHtmlLoader
     {
-        HtmlDocument Load(string url);
+        Task<HtmlDocument> LoadAsync(string url);
     }
 }

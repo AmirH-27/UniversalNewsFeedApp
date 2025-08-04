@@ -15,10 +15,10 @@ namespace UniversalNewsFeedApp.Services
             _htmlLoader = htmlLoader;
         }
 
-        public List<NewsArticle> FetchNews()
+        public async Task<List<NewsArticle>> FetchNews()
         {
             var articles = new List<NewsArticle>();
-            var doc = _htmlLoader.Load(_config.PageUrl);
+            var doc = await _htmlLoader.LoadAsync(_config.PageUrl);
             var linkNodes = doc.DocumentNode.SelectNodes(_config.LinkSelector);
             if (linkNodes == null)
             {
