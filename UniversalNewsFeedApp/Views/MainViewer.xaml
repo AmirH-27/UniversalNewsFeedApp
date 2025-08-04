@@ -7,17 +7,18 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              mc:Ignorable="av" x:Class="UniversalNewsFeedApp.Views.MainViewer"
              Height="Auto" Width="Auto" av:DesignHeight="343.92" av:DesignWidth="652.5">
-    
-    <UserControl.DataContext>
-        <vm:MainViewModel />
-    </UserControl.DataContext>
+
 
     <Grid Margin="10">
+        
         <!-- Define two rows: one for button, one for data -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <Label Content="{Binding TextMessage}" HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="139"/>
+
 
         <!-- Button aligned to the top-right -->
         <DockPanel Grid.Row="0" LastChildFill="False" HorizontalAlignment="Right">
@@ -41,11 +42,18 @@
                 <DataGridTemplateColumn Header="Headline" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
+
                             <TextBlock Text="{Binding Headline}"
-                               TextDecorations="Underline"
-                               Foreground="Blue"
-                               Cursor="Hand"
-                               MouseLeftButtonUp="Headline_MouseLeftButtonUp"/>
+                                   TextDecorations="Underline"
+                                   Foreground="Blue"
+                                   Cursor="Hand">
+                                <TextBlock.InputBindings>
+                                    <MouseBinding Gesture="LeftClick"
+                                      Command="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                      CommandParameter="{Binding}" />   
+                            </TextBlock.InputBindings>
+                            </TextBlock>
+
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -54,6 +62,5 @@
                 <DataGridTextColumn Header="Downloaded At" Binding="{Binding DownloadedAt}" Width="*" />
             </DataGrid.Columns>
         </DataGrid>
-        <Label Content="News Feed Application" HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="139"/>
     </Grid>
 </UserControl>

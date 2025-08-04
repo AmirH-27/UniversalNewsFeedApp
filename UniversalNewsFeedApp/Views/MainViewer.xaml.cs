@@ -1,7 +1,7 @@
-﻿using UniversalNewsFeedApp.Model;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows.Controls;
-using System.Windows.Input;
+using UniversalNewsFeedApp.Services;
+using UniversalNewsFeedApp.ViewModel;
 
 namespace UniversalNewsFeedApp.Views
 {
@@ -10,15 +10,7 @@ namespace UniversalNewsFeedApp.Views
         public MainViewer()
         {
             InitializeComponent();
-        }
-
-        public void Headline_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is TextBlock tb && tb.DataContext is NewsArticle article)
-            {
-                Console.WriteLine($"Opening URL: {article.Url}");
-                Process.Start(new ProcessStartInfo(article.Url) { UseShellExecute = true });
-            }
+            this.DataContext = new MainViewModel(new UrlOpenerService(new ProcessWrapperService()), new ConfigConversionService("Config/sources.json", new FileService()), new HtmlLoader());
         }
     }
 }
