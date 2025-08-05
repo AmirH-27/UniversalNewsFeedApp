@@ -12,38 +12,35 @@ namespace UniversalNewsFeedApp.Services
             _configFilePath = configFilePath;
             _fileSystem = fileSystem;
         }
-        public List<SourceConfig> convertJsonToObj()
+        public async IAsyncEnumerable<SourceConfig> convertJsonToObj()
         {
+            string json;
             try
             {
-                if (!_fileSystem.Exists(_configFilePath))
-                {
-                    throw new FileNotFoundException("Config file not found", _configFilePath);
-                }
-                var json = _fileSystem.ReadAllText(_configFilePath);
-                var configs = JsonSerializer.Deserialize<List<SourceConfig>>(json);
-                if (configs == null)
-                {
-                    throw new NullReferenceException("Configuration file is empty");
-                }
-                return configs;
+                json = await _fileSystem.ReadAllTextAsync(_configFilePath);
             }
             catch (FileNotFoundException)
             {
-                throw;
+                yield break;
+            }
+            List<SourceConfig>? configs = null;
+
+            try
+            {
+                configs = JsonSerializer.Deserialize<List<SourceConfig>>(json);
             }
             catch (JsonException ex)
             {
                 throw new JsonException("Failed to deserialize JSON data.", ex);
             }
-            catch (IOException ex)
+
+            if (configs == null) yield break;
+
+            foreach (var config in configs)
             {
-                throw new IOException("Error reading the file.", ex);
+                yield return config;
             }
-            catch (Exception ex)
-            { 
-                throw new InvalidOperationException("An error occurred.", ex);
-            }
+
         }
     }
 }

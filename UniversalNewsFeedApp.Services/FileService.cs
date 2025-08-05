@@ -1,4 +1,5 @@
-﻿namespace UniversalNewsFeedApp.Services;
+﻿
+namespace UniversalNewsFeedApp.Services;
 
 public class FileService : IFileSystem
 {
@@ -7,8 +8,9 @@ public class FileService : IFileSystem
         return File.Exists(path);
     }
 
-    public string ReadAllText(string path)
+    public Task<string> ReadAllTextAsync(string path)
     {
-        return File.ReadAllText(path);
+        return File.ReadAllTextAsync(path);
     }
+
 }

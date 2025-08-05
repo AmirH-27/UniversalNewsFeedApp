@@ -1,6 +1,7 @@
 using HtmlAgilityPack;
 using UniversalNewsFeedApp.Model;
 using System.Net;
+using System.Reflection;
 
 namespace UniversalNewsFeedApp.Services
 {
@@ -15,18 +16,18 @@ namespace UniversalNewsFeedApp.Services
             _htmlLoader = htmlLoader;
         }
 
-        public async Task<List<NewsArticle>> FetchNews()
+        public async IAsyncEnumerable<NewsArticle> FetchNewsAsync()
         {
             var articles = new List<NewsArticle>();
             var doc = await _htmlLoader.LoadAsync(_config.PageUrl);
             var linkNodes = doc.DocumentNode.SelectNodes(_config.LinkSelector);
             if (linkNodes == null)
             {
-                return articles;
+                yield break;
             }
 
             foreach (var linkNode in linkNodes)
-            {              
+            {
                 var href = ExtractUrl(linkNode);
                 if (string.IsNullOrEmpty(href))
                 {
@@ -42,15 +43,14 @@ namespace UniversalNewsFeedApp.Services
                     continue;
                 }
 
-                articles.Add(new NewsArticle
+                yield return new NewsArticle
                 {
                     Source = _config.Source,
                     Headline = title,
                     Url = fullUrl,
                     DownloadedAt = DateTime.UtcNow
-                });
+                };
             }
-            return articles;
         }
 
         private string ExtractUrl(HtmlNode node)

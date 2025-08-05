@@ -2,39 +2,96 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="clr-namespace:UniversalNewsFeedApp.ViewModel"
+    xmlns:conv="clr-namespace:UniversalNewsFeedApp.Converters"
     xmlns:local="clr-namespace:UniversalNewsFeedApp.Views"
     xmlns:av="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="av"
     x:Class="UniversalNewsFeedApp.Views.MainViewer"
-    Height="Auto" Width="Auto" av:DesignHeight="343.92" av:DesignWidth="652.5">
+    Height="Auto" Width="Auto">
 
-    <!-- Layering container -->
-    <Grid>
-        <!-- Main content -->
-        <Grid Margin="10">
+    <UserControl.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#005F9E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#FAFAFA">
+        <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Content="{Binding TextMessage}" HorizontalAlignment="Center" Height="28" VerticalAlignment="Center" Width="139"/>
+            <!-- Header and Controls -->
+            <DockPanel Grid.Row="0" Margin="0,0,0,10">
+                <StackPanel DockPanel.Dock="Left">
+                    <TextBlock Text="{Binding TextMessage}"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               FontFamily="Segoe UI"
+                               Foreground="#333"
+                               Margin="0,0,0,4"/>
 
-            <DockPanel Grid.Row="0" LastChildFill="False" HorizontalAlignment="Right">
-                <Button Content="Refresh News"
+                    <TextBlock FontWeight="SemiBold"
+                               FontSize="14"
+                               Foreground="#555">
+                        <Run Text="Loaded Articles: "/>
+                        <Run Text="{Binding ArticlesLoadedCount}" />
+                    </TextBlock>
+                </StackPanel>
+
+                <Button Content="⟳ Refresh News"
                         Command="{Binding RefreshCommand}"
-                        Padding="10" Margin="0,0,0,10"/>
+                        Style="{StaticResource ModernButtonStyle}"
+                        Width="150"
+                        Height="35"
+                        HorizontalAlignment="Right"
+                        Margin="10,0,0,0"/>
             </DockPanel>
 
+            <!-- DataGrid -->
             <DataGrid Grid.Row="1"
                       ItemsSource="{Binding Articles}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
-                      Margin="0"
                       HeadersVisibility="Column"
+                      AlternatingRowBackground="#F4F4F4"
+                      RowBackground="White"
                       SelectionMode="Single"
-                      SelectionUnit="FullRow">
-
+                      SelectionUnit="FullRow"
+                      FontFamily="Segoe UI"
+                      FontSize="13"
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="1"
+                      BorderBrush="#DDD"
+                      Margin="0"
+                      ColumnHeaderHeight="30"
+                      RowHeight="28">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="*" />
                     <DataGridTemplateColumn Header="Headline" Width="2*">
@@ -42,8 +99,9 @@
                             <DataTemplate>
                                 <TextBlock Text="{Binding Headline}"
                                            TextDecorations="Underline"
-                                           Foreground="Blue"
-                                           Cursor="Hand">
+                                           Foreground="#007ACC"
+                                           Cursor="Hand"
+                                           ToolTip="{Binding Headline}">
                                     <TextBlock.InputBindings>
                                         <MouseBinding Gesture="LeftClick"
                                                       Command="{Binding DataContext.OpenUrlCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -58,25 +116,32 @@
             </DataGrid>
         </Grid>
 
-        <!-- Loading overlay centered -->
-        <TextBlock Text="Loading..."
-                   FontSize="20"
-                   FontWeight="Bold"
-                   Foreground="Black"
-                   Background="White"
-                   Padding="10"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center">
-            <TextBlock.Style>
-                <Style TargetType="TextBlock">
-                    <Setter Property="Visibility" Value="Collapsed" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
-                            <Setter Property="Visibility" Value="Visible" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Style>
-        </TextBlock>
+        <!-- Corner Loading Indicator -->
+        <Grid x:Name="LoadingIndicatorPanel"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Margin="20"
+              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+              IsHitTestVisible="False"
+              Panel.ZIndex="100">
+            <Border Background="#F0F0F0"
+                    Padding="10"
+                    CornerRadius="6"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
+                </Border.Effect>
+
+                <StackPanel>
+                    <TextBlock Text="Loading articles..." 
+                               FontWeight="SemiBold" 
+                               FontSize="13" 
+                               Foreground="#333"
+                               Margin="0,0,0,8"/>
+                    <ProgressBar IsIndeterminate="True" Width="150" Height="10"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
