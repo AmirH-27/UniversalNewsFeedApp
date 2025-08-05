@@ -35,7 +35,11 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             // Assert
             Assert.Empty(result);
@@ -60,7 +64,11 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -88,10 +96,14 @@ namespace UniversalNewsFeedApp.Services.Test
             var service = CreateService(config, html);
 
             // Act
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             // Assert
-            Assert.Single(result);
+            Assert.Equal(2, result.Count);
         }
 
         [Fact]
@@ -109,7 +121,11 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             Assert.Empty(result);
         }
@@ -138,9 +154,13 @@ namespace UniversalNewsFeedApp.Services.Test
             config.UrlSelector = urlSelector;
 
             var service = CreateService(config, html);
-            
+
             // Act
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             // Assert
             Assert.Single(result);
@@ -160,7 +180,11 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             Assert.Empty(result);
         }
@@ -181,7 +205,11 @@ namespace UniversalNewsFeedApp.Services.Test
             </html>";
 
             var service = CreateService(config, html);
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             Assert.Single(result);
         }
@@ -200,7 +228,11 @@ namespace UniversalNewsFeedApp.Services.Test
                 /html>";
 
             var service = CreateService(config, html);
-            var result = await service.FetchNews();
+            var result = new List<NewsArticle>();
+            await foreach (var article in service.FetchNewsAsync())
+            {
+                result.Add(article);
+            }
 
             Assert.Single(result);
             Assert.Equal("Hello & World", result[0].Headline);

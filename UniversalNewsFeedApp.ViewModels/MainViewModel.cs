@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows.Input;
 using UniversalNewsFeedApp.Model;
 using UniversalNewsFeedApp.Services;
@@ -11,15 +10,14 @@ namespace UniversalNewsFeedApp.ViewModel
     public partial class MainViewModel : ObservableObject
     {
         public ObservableCollection<NewsArticle> Articles { get; set; } = new();
-        public ICommand RefreshCommand { get; }
-        public ICommand OpenUrlCommand { get; }
         [ObservableProperty]
         private string textMessage;
         [ObservableProperty]
         private bool isLoading;
         [ObservableProperty]
         private int articlesLoadedCount;
-
+        public ICommand RefreshCommand { get; }
+        public ICommand OpenUrlCommand { get; }
         public IUrlOpenerService UrlOpenerService { get; }
         public IConfigService ConfigService { get; }
         public IHtmlLoader HtmlLoader { get; }

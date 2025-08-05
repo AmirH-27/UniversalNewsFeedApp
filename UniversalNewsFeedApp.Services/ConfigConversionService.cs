@@ -19,9 +19,9 @@ namespace UniversalNewsFeedApp.Services
             {
                 json = await _fileSystem.ReadAllTextAsync(_configFilePath);
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException ex)
             {
-                yield break;
+                throw new FileNotFoundException("Config file not found.", ex);
             }
             List<SourceConfig>? configs = null;
 

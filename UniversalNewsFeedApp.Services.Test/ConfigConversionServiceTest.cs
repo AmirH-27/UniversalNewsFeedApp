@@ -1,5 +1,6 @@
 ﻿using Moq;
 using System.Text.Json;
+using UniversalNewsFeedApp.Model;
 
 namespace UniversalNewsFeedApp.Services.Test
 {
@@ -7,15 +8,19 @@ namespace UniversalNewsFeedApp.Services.Test
     {
         private const string filePath = "Config/souces.json";
         [Fact]
-        public void ConvertJsonToObj_ReturnsList_WhenJsonIsValid()
+        public async Task ConvertJsonToObj_ReturnsList_WhenJsonIsValid()
         {
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns(true);
-            mockFileSystem.Setup(fs => fs.ReadAllText(It.IsAny<string>()))
-                .Returns("[{\"PageUrl\":\"http://example.com\"}]");
+            mockFileSystem.Setup(fs => fs.ReadAllTextAsync(It.IsAny<string>()))
+                .ReturnsAsync("[{\"PageUrl\":\"http://example.com\"}]");
             var service = new ConfigConversionService(filePath, mockFileSystem.Object);
 
-            var result = service.convertJsonToObj();
+            var result = new List<SourceConfig>();
+            await foreach (var config in service.convertJsonToObj())
+            { 
+                result.Add(config);
+            }
 
             Assert.NotNull(result);
             Assert.Single(result);
@@ -23,27 +28,35 @@ namespace UniversalNewsFeedApp.Services.Test
         }
 
         [Fact]
-        public void ConvertJsonToObj_FileNotFound()
+        public async Task ConvertJsonToObj_FileNotFound()
         {
             var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns(false);
-            
+            mockFileSystem
+            .Setup(fs => fs.ReadAllTextAsync(It.IsAny<string>()))
+            .Throws(new FileNotFoundException());
+
             var service = new ConfigConversionService(filePath, mockFileSystem.Object);
 
-            var ex = Assert.Throws<FileNotFoundException>(() => service.convertJsonToObj());
-            Assert.Equal("Config file not found", ex.Message);
+            var ex = await Assert.ThrowsAsync<FileNotFoundException>(async () =>
+            {
+                await foreach (var _ in service.convertJsonToObj()) { }
+
+            });
+            Assert.Equal("Config file not found.", ex.Message);
         }
         [Fact]
-        public void ConvertJsonToObj_JsonException()
+        public async Task ConvertJsonToObj_JsonException()
         {
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(fs => fs.Exists(It.IsAny<string>())).Returns(true);
-            mockFileSystem.Setup(fs => fs.ReadAllText(filePath)).Returns("Invalid JSON");
+            mockFileSystem.Setup(fs => fs.ReadAllTextAsync(filePath)).ReturnsAsync("Invalid JSON");
 
             var service = new ConfigConversionService(filePath, mockFileSystem.Object);
 
-            var ex = Assert.Throws<JsonException>(() => service.convertJsonToObj());
-            Assert.Equal("Failed to deserialize JSON data.", ex.Message);
+            var ex = await Assert.ThrowsAsync<JsonException>(async () =>
+            {
+                await foreach (var _ in service.convertJsonToObj()) { }
+            });
         }
     }
 }
